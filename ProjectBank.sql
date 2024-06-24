@@ -76,14 +76,31 @@ Create Table EmployeeData
  --AGREWGAMOS UNA COLUMNA DEL RENDIMIENTO MENSUAL DE EMPLEADOS EN UNA TABLA (MEDIDOS DEL 1 AL 10)
 ALTER TABLE BankEmployees
 ADD Performance int;
-TABLE BankEmployees
+
+alter TABLE BankEmployees
 DROP COLUMN Performance;
 
 UPDATE BankEmployees
-SET Performance = 7
-WHERE Employee_ID = 1020
+SET Performance = 8
+WHERE Employee_ID = 1000
+
 select * from EmployeeData
 SELECT * FROM BankEmployees
+
+--Departamento con mayor cantidad de empleados
+select Department, count(Department)
+from BankEmployees
+group by Department
+--having COUNT(Department) > 1
+order by count(Department) desc
+
+--La performance tiene relación al Salario?
+select Department, Performance,
+avg(Salary) over (partition by Performance) as SalaryavgPerformance
+from BankEmployees BE
+join EmployeeData ED
+ON BE.Employee_ID = ED.Employee_ID
+order by SalaryavgPerformance desc
 
 --Promedio de Sueldos según Departamento
 select Department, avg(Salary) as avgSalary
@@ -104,23 +121,52 @@ ON BE.Employee_ID = ED.Employee_ID
 where Performance >= 8
 Order by Performance desc;
 
+
+
+
 --les vamos a dar un aumento del 10% a quienes tengan performance mayor a 8, al resto solo un 5%
+select * FROM EmployeeData
+select * from BankEmployees
+
 select *,
 case
-    when Performance >= 8 then Salary + Salary * 0.1
-	when Performance < 8 then Salary + Salary * 0.05
-end as NewSalary
-from BankEmployees;
+    when Performance >= 8 Salary + Salary * 0.1
+	else Salary + Salary * 0.05
+end NewSalary
+from BankEmployees
 
-create view NewSalaryMonth as
-select BE.Employee_ID, FirstName, LastName, Department, Job_Title, Email,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--creamos una vista para obtener un rapido resultado del aumento salarial
+create view NewSalaryperMonth as
+select BE.Employee_ID, FirstName, LastName, Department, Job_Title, Performance,
 case
-    when Performance >= 8 then Salary + Salary * 0.1
-	when Performance < 8 then Salary + Salary * 0.05
-end as NewSalary
+   when Performance >= 8 then Salary + Salary * 0.1
+   else Salary + Salary * 0.01
+end NewSalary
 from BankEmployees as BE
-JOIN
-EmployeeData as ED
-on BE.Employee_ID =ED.Employee_ID;
+join EmployeeData as ED
+ON BE.Employee_ID = ED.Employee_ID;
 
-select * from NewSalaryMonth
+SELECT * FROM NewSalaryperMonth
